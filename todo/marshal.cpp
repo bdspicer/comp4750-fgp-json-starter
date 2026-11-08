@@ -13,6 +13,11 @@ using String = json::String;
 using Array = json::Array;
 using Data = json::Data;
 
+Object todoToObject(TodoList const& list);
+Object taskToObject(Task task);
+Array translateTaskList(std::vector<Task> tasks);
+Array getTags(std::vector<std::string> tags);
+
 // An object is a map of strings to Data
 json::Data marshal(TodoList const& list) {
 	json::Object toDoObject = todoToObject(list);
@@ -24,7 +29,6 @@ json::Data marshal(TodoList const& list) {
 // not correctly describe a to-do list.
 TodoList unmarshal(json::Data const& data) {
 	TodoList unData;
-	unData.nextId = data.variant()["nextId"];
   return { };
 }
 
@@ -32,11 +36,15 @@ TodoList unmarshal(json::Data const& data) {
 // You are encouraged to write additional functions to use
 // as you are implementing the two above.
 //----------------------------------------------------------
-Object todoToObject(TodoList const& list){
-	Object listObj;
-	listObj["nextId"] = list.nextId;
-	listObj["tasks"] = translateTaskList(list.tasks);
-	return listObj;
+
+
+Array getTags(std::vector<std::string> tags) {
+	Array arr;
+	for (std::string tag : tags) {
+		String strTag = tag;
+		arr.push_back(strTag);
+	}
+	return arr;
 }
 
 Array translateTaskList(std::vector<Task> tasks) {
@@ -44,7 +52,16 @@ Array translateTaskList(std::vector<Task> tasks) {
 	for (Task task : tasks) {
 		translatedTasks.push_back(taskToObject(task));
 	}
+	return translatedTasks;
 }
+
+Object todoToObject(TodoList const& list) {
+	Object listObj;
+	listObj["nextId"] = list.nextId;
+	listObj["tasks"] = translateTaskList(list.tasks);
+	return listObj;
+}
+
 
 Object taskToObject(Task task) {
 	Object taskObj;
@@ -59,14 +76,6 @@ Object taskToObject(Task task) {
 	else {
 		taskObj["completed"] = json::null;
 	}
-}
-
-Array getTags(std::vector<std::string> tags){
-	Array arr;
-	for (std::string tag : tags) {
-		String strTag = tag;
-		arr.push_back(strTag);
-	}
-	return arr;
+	return taskObj;
 }
 

@@ -73,6 +73,16 @@ namespace json {
 		return indentSpacing;
 	}
 
+	struct Format {
+		const Data& data;
+		int indent = 0;
+	};
+
+	Format format(const Data& data, int indent) {
+		Format formatData{ data, indent };
+		return formatData;
+	}
+
 	struct Printer {
 		std::ostream& out;
 		int indent = 0;
@@ -130,16 +140,15 @@ namespace json {
 			out << optionalNewLine(indent) << "}";
 		}
 	};
-
+	std::ostream& operator<<(std::ostream& out, const Data& data) {
+		Printer printer{ out, 0 };
+		std::visit(printer, data.variant());
+		return out;
+	}
+	std::ostream& operator<<(std::ostream& out, const Format& format) {
+		Printer printer{ out, format.indent };
+		std::visit(printer, format.data.variant());
+		return out;
+	}
 }
-
-//struct Format {
-//	const Data& data;
-//	int indent = 0;
-//};
-//
-//Format format(const Data& data, int indent) {
-//	Format formatData{ data, indent };
-//	return formatData;
-//}
 

@@ -46,6 +46,9 @@ namespace json {
 		DataVariant data;
 	};
 
+	struct Format;
+	Format format(const Data& data, int indent);
+	std::ostream& operator<<(std::ostream& out, const Format& format);
 	std::ostream& operator<<(std::ostream& out, const Data& data);
 	template<typename T> 
 	T& as(Data& data) {
@@ -55,10 +58,10 @@ namespace json {
 	const T& as(Data const& data) {
 		return std::get<T>(data.variant());
 	}
-	/*template<typename T>
+	template<typename T>
 	bool is(Data const& data) {
 		return std::holds_alternative<T>(data.variant());
-	}*/
+	}
 	template<typename T>
 	bool is(Data& data) {
 		return std::holds_alternative<T>(data.variant());
