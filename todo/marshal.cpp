@@ -16,14 +16,14 @@ using Data = json::Data;
 using MapElem = std::pair<std::string, json::Data>;
 
 Object todoToObject(TodoList const& list);
-int highestId(Data& data);
-Task buildTasks(Object taskObj);
+int highestId(Data const& data);
+std::vector<Task> buildTasks(Data const& data);
 
 // An object is a map of strings to Data
 json::Data marshal(TodoList const& list) {
 	Object toDoObject = todoToObject(list);
 	Data marshaledJson = toDoObject;
-  return marshaledJson;
+	return marshaledJson;
 }
 
 
@@ -49,26 +49,64 @@ std::vector<std::string> getTags(Array tags) {
 	return tagList;
 }
 
+void throwRuntimeErr(std::string error) {
+	throw std::runtime_error(error);
+}
+
 Task buildTask(Object taskObj) {
 	Task task;
-	task.id = as<Number>(taskObj["id"]);
-	task.title = as<String>(taskObj["title"]);
-	task.done = as<Boolean>(taskObj["done"]);
-	task.tags = getTags(as<Array>(taskObj["tags"]));
+	if (is<Number>(taskObj)["id"]){
+		task.id = as<Number>(taskObj["id"]);
+	}
+	else {
+		throwRuntimeErr("Error: Task ID must be an Int.");
+	}
+	if ((is<String>(taskObj)["title"])) {
+		task.title = as<String>(taskObj["title"]);
+	}
+	else {
+		throwRuntimeErr("Error: Title must be a String.");
+	}
+	if (is<Boolean>(taskObj)["done"]) {
+		task.done = as<Boolean>(taskObj["done"]);
+	}
+	else {
+		throwRuntimeErr("Error: \"Done\" value must be a Boolean.");
+	}
+	if (is<Array>(taskObj)["tags"]) {
+		task.tags = getTags(as<Array>(taskObj["tags"]));
+	}
+	else {
+		throwRuntimeErr("Error: \"Tags\" must hold an Array.");
+	}
 	if (!is<json::Null>(taskObj["completed"])) {
 		task.completed = std::nullopt;
 	}
-	else {
+	else if (is<String>(taskObj["completed"])) {
 		task.completed = as<String>(taskObj["completed"]);
+	}
+	else {
+		throwRuntimeErr("Error: \"Completed\" value must be Null or String value.");
 	}
 	return task;
 }
 
 Array getTasksFromData(Data const& data) {
 	Object toDoObject = as<Object>(data);
-	auto tasks = std::find(begin(toDoObject), end(toDoObject), "tasks");
-	MapElem task = *tasks;
-	Array taskArray = as<Array>(task.second);
+	Array taskArray{};
+	auto tasks = toDoObject.find(String{"tasks"});
+	if (tasks == toDoObject.end()) {
+		throwRuntimeErr("Error: No \"tasks\" list found.");
+	}
+	else {
+		MapElem task = *tasks;
+		if (is<Array>(task.second)) {
+			taskArray = as<Array>(task.second);
+		}
+		else {
+			throwRuntimeErr("Error: \"tasks\" value must be stored as an Array.");
+		}
+	}
 	return taskArray;
 }
 
@@ -84,7 +122,8 @@ std::vector<Task> buildTasks(Data const& data) {
 int highestId(Data const& data) {
 	int highestId = 0;
 	Array taskArray = getTasksFromData(data);
-	auto arrayEnd = end(taskArray)--;
+	auto arrayEnd = end(taskArray);
+	--arrayEnd;
 	Object lastArrayElem = as<Object>(*arrayEnd);
 	highestId = as<Number>(lastArrayElem["id"]);
 	return ++highestId;
