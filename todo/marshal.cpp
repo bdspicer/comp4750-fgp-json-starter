@@ -43,8 +43,10 @@ TodoList unmarshal(json::Data const& data) {
 
 std::vector<std::string> getTags(Array tags) {
 	std::vector<std::string> tagList = std::vector<std::string>(tags.size());
-	for (int i = 0; i < tags.size(); ++i) {
-		tagList[i] = as<String>(tags[i]);
+	if (tags.size() != 0) {
+		for (int i = 0; i < tags.size(); ++i) {
+			tagList[i] = as<String>(tags[i]);
+		}
 	}
 	return tagList;
 }
@@ -113,8 +115,10 @@ Array getTasksFromData(Data const& data) {
 std::vector<Task> buildTasks(Data const& data) {
 	Array taskArray = getTasksFromData(data);
 	std::vector<Task> tasks = std::vector<Task>(taskArray.size());
-	for (int i = 0; i < taskArray.size(); ++i) {
-		tasks[i] = buildTask(as<Object>(taskArray[i]));
+	if (taskArray.size() != 0) {
+		for (int i = 0; i < taskArray.size(); ++i) {
+			tasks[i] = buildTask(as<Object>(taskArray[i]));
+		}
 	}
 	return tasks;
 }
