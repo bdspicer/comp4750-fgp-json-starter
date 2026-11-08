@@ -3,9 +3,10 @@
 # Version with source files
 add_library(libjson STATIC
   include/json.hpp
+  include/Data.hpp
   include/parse.hpp
   parse.cpp
-)
+ "Data.cpp")
 
 target_include_directories(libjson PUBLIC "include")
 
