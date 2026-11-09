@@ -1,34 +1,33 @@
+#pragma once
 #include"Data.hpp"
 #include<iomanip>
 
 namespace json {
 	Data::Data() : data{} {};
 	Data::Data(Null n) : data{} {};
-	template<std::same_as<bool> B>
-	Data::Data(B value) : data{ value } {};
-	template<std::same_as<bool> B>
-	void Data::operator=(const B& value) {
-		data = value;
-	}
 	Data::Data(Number numValue) : data{ numValue } {};
-	void Data::operator=(const Number& numValue) {
+	Data& Data::operator=(const Number& numValue) {
 		data = numValue;
+		return *this;
 	}
 	Data::Data(char const* characters) {
 		String str = characters;
 		data = str;
 	}
 	Data::Data(String strValue) : data{ strValue } {};
-	void Data::operator=(const String& strValue) {
+	Data& Data::operator=(const String& strValue) {
 		data = strValue;
+		return *this;
 	}
 	Data::Data(Array arValue) : data{ arValue } {};
-	void Data::operator=(const Array& arValue) {
+	Data& Data::operator=(const Array& arValue) {
 		data = arValue;
+		return *this;
 	}
 	Data::Data(Object objValue) : data{ objValue } {};
-	void Data::operator=(const Object& objValue) {
+	Data& Data::operator=(const Object& objValue) {
 		data = objValue;
+		return *this;
 	}
 	std::partial_ordering Data::operator <=>(Data const&) const = default;
 
@@ -41,6 +40,8 @@ namespace json {
 	DataVariant&& Data::variant()&& {
 		return std::move(data);
 	}
+
+	Null null;
 
 	bool Data::operator==(Data const&) const = default;
 
@@ -71,16 +72,6 @@ namespace json {
 			indentSpacing = " ";
 		}
 		return indentSpacing;
-	}
-
-	struct Format {
-		const Data& data;
-		int indent = 0;
-	};
-
-	Format format(const Data& data, int indent) {
-		Format formatData{ data, indent };
-		return formatData;
 	}
 
 	struct Printer {

@@ -8,6 +8,7 @@
 // Constructs JSON Data object corresponding to TodoList.
 
 using Object = json::Object;
+using Null = json::Null;
 using Number = json::Number;
 using Boolean = json::Boolean;
 using String = json::String;
@@ -81,7 +82,7 @@ Task buildTask(Object taskObj) {
 	else {
 		throwRuntimeErr("Error: \"Tags\" must hold an Array.");
 	}
-	if (!is<json::Null>(taskObj["completed"])) {
+	if (is<Null>(taskObj["completed"])) {
 		task.completed = std::nullopt;
 	}
 	else if (is<String>(taskObj["completed"])) {

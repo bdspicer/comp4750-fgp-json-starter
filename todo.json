@@ -1,0 +1,36 @@
+{
+    "nextId": 4,
+    "tasks": [ 
+        {
+    "completed": null,
+    "done": false,
+    "id": 1,
+    "tags": [ 
+            "school"
+        ],
+    "title": "Get the project working"
+}, 
+        {
+    "completed": null,
+    "done": false,
+    "id": 2,
+    "tags": [ 
+            "school", 
+            "unmarshal", 
+            "work"
+        ],
+    "title": "Make"
+}, 
+        {
+    "completed": null,
+    "done": false,
+    "id": 3,
+    "tags": [ 
+            "school", 
+            "unmarshal", 
+            "work"
+        ],
+    "title": "Make"
+}
+    ]
+}

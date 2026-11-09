@@ -8,10 +8,11 @@
 
 namespace json {
 
+
 	class Data;
 
 	using Null = std::monostate;
-	Null null;
+	extern Null null;
 	using Boolean = bool;
 	using Number = double;
 	using String = std::string;
@@ -24,18 +25,18 @@ namespace json {
 		Data();
 		Data(Null n);
 		template<std::same_as<bool> B>
-		Data(B value);
+		Data(B value) : data{ value } {};
 		template<std::same_as<bool> B>
-		void operator=(const B& value);
+		Data& operator=(const B& value);
 		Data(Number numValue);
-		void operator=(const Number& numValue);
+		Data& operator=(const Number& numValue);
 		Data(String strValue);
-		void operator=(const String& strValue);
+		Data& operator=(const String& strValue);
 		Data(const char* characters);
 		Data(Array arValue);
-		void operator=(const Array& arrValue);
+		Data& operator=(const Array& arrValue);
 		Data(Object objValue);
-		void operator=(const Object& objValue);
+		Data& operator=(const Object& objValue);
 		bool operator==(Data const&) const;
 		std::partial_ordering operator <=>(Data const&) const;
 		DataVariant& variant()&;
@@ -46,10 +47,24 @@ namespace json {
 		DataVariant data;
 	};
 
-	struct Format;
-	Format format(const Data& data, int indent);
-	std::ostream& operator<<(std::ostream& out, const Format& format);
+	struct Format {
+		const Data& data;
+		int indent;
+	};
+
+	inline json::Format format(const Data& data, int indent) {
+		Format formatData{ data, indent };
+		return formatData;
+	}
+
+	std::ostream& operator<<(std::ostream& out, Format const& format);
 	std::ostream& operator<<(std::ostream& out, const Data& data);
+	
+	template<std::same_as<bool> B>
+	Data& Data::operator=(const B& value) {
+		data = value;
+		return *this;
+	}
 	template<typename T> 
 	T& as(Data& data) {
 		return std::get<T>(data.variant());
