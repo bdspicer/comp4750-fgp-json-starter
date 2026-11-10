@@ -110,13 +110,11 @@ Array getTasksFromData(Data const& data) {
 	if (tasks == toDoObject.end()) {
 		throwRuntimeErr("Error: No \"tasks\" list found.");
 	}
-	else {
-		MapElem task = *tasks;
-		if (!is<Array>(task.second)) {
-			throwRuntimeErr("Error: \"tasks\" value must be stored as an Array.");
-		}
-		return as<Array>(task.second);
+	MapElem task = *tasks;
+	if (!is<Array>(task.second)) {
+		throwRuntimeErr("Error: \"tasks\" value must be stored as an Array.");
 	}
+	return as<Array>(task.second);
 }
 
 // Finds the highestId stored in Data's taskArray, increments and returns it
