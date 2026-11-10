@@ -19,7 +19,8 @@ using MapElem = std::pair<std::string, json::Data>;
 Object todoToObject(TodoList const& list);
 
 // Declarations of unmarshal functions
-int highestId(Data const& data);
+//int highestId(Data const& data);
+int nextIdFromData(Data const& data);
 std::vector<Task> buildTasks(Data const& data);
 
 // An object is a map of strings to Data
@@ -29,12 +30,11 @@ json::Data marshal(TodoList const& list) {
 	return marshaledJson;
 }
 
-
 // Constructs TodoList corresponding to JSON Data.  Throws std::runtime_error if the JSON Data does
 // not correctly describe a to-do list.
 TodoList unmarshal(json::Data const& data) {
 	TodoList unData;
-	unData.nextId = highestId(data);
+	unData.nextId = nextIdFromData(data);
 	unData.tasks = buildTasks(data);
 	return unData;
 }
@@ -46,6 +46,21 @@ TodoList unmarshal(json::Data const& data) {
 // Runtime error helper function
 void throwRuntimeErr(std::string error) {
 	throw std::runtime_error(error);
+}
+
+int nextIdFromData(Data const& data) {
+	int nextId = 0;
+	Object taskObj = as<Object>(data);
+	auto nextIdIt = taskObj.find("nextId");
+	if (nextIdIt == end(taskObj)) {
+		throwRuntimeErr("Error: nextId key is missing.");
+	}
+	else {
+		auto nextIdPair = *nextIdIt;
+		Data pair = nextIdPair.second;
+		nextId = as<Number>(pair);
+	}
+	return nextId;
 }
 
 // Converts a vector of std::string to a json::Array
@@ -115,17 +130,6 @@ Array getTasksFromData(Data const& data) {
 		throwRuntimeErr("Error: \"tasks\" value must be stored as an Array.");
 	}
 	return as<Array>(task.second);
-}
-
-// Finds the highestId stored in Data's taskArray, increments and returns it
-int highestId(Data const& data) {
-	int highestId = 0;
-	Array taskArray = getTasksFromData(data);
-	auto arrayEnd = end(taskArray);
-	--arrayEnd;
-	Object lastArrayElem = as<Object>(*arrayEnd);
-	highestId = as<Number>(lastArrayElem["id"]);
-	return ++highestId;
 }
 
 // Builds a task using an Object, throws runtime error if key's value is missing
