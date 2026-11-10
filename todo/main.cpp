@@ -8,9 +8,9 @@
 //   rename <id> <title>      Change a task's title
 //   remove <id>              Delete a task
 
+#include "json.hpp"
 #include "todo.hpp"
 #include "marshal.hpp"
-#include "json.hpp"
 
 #include <algorithm>
 #include <chrono>
