@@ -37,7 +37,6 @@ TodoList unmarshal(json::Data const& data) {
 	return unData;
 }
 
-
 // You are encouraged to write additional functions to use
 // as you are implementing the two above.
 //----------------------------------------------------------
@@ -65,7 +64,8 @@ Task buildTask(Object taskObj) {
 		throwRuntimeErr("Error: Task ID must be an Int.");
 	}
 	if ((is<String>(taskObj)["title"])) {
-		task.title = as<String>(taskObj["title"]);
+		String title = as<String>(taskObj["title"]);
+		task.title = title;
 	}
 	else {
 		throwRuntimeErr("Error: Title must be a String.");
@@ -161,7 +161,7 @@ Object taskToObject(Task const& task) {
 
 Array translateTaskList(const std::vector<Task>& tasks) {
 	Array translatedTasks;
-	for (Task task : tasks) {
+	for (const Task& task : tasks) {
 		translatedTasks.push_back(taskToObject(task));
 	}
 	return translatedTasks;

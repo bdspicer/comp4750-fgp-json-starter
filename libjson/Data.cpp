@@ -74,63 +74,65 @@ namespace json {
 		return indentSpacing;
 	}
 
-	struct Printer {
-		std::ostream& out;
-		int indent = 0;
-		int nestIndent = indent;
-		void operator()(const Null& n) {
+struct Printer {
+	std::ostream& out;
+	int indent = 0;
+	int nestIndent = 0;
+	void operator()(const Null& n) {
 
-			out << "null";
+		out << "null";
+	}
+	void operator()(const Boolean& b) {
+		if (b) {
+			out << "true";
 		}
-		void operator()(const Boolean& b) {
-			if (b) {
-				out << "true";
-			}
-			else {
-				out << "false";
-			}
+		else {
+			out << "false";
 		}
-		void operator()(const Number& n) {
-			out << n;
-		}
-		void operator()(const String& str) {
-			out << std::quoted(str);
-		}
-		void operator()(const Array& arr) {
-			out << '[' << spaceIfIndent(indent);
-			if (arr.size() > 0) {
-				nestIndent += indent;
-				for (int i = 0; i < arr.size(); ++i) {
-					if (i != 0) {
-						out << ',' << spaceIfIndent(nestIndent);
-					}
+	}
+	void operator()(const Number& n) {
+		out << n;
+	}
+	void operator()(const String& str) {
+		out << std::quoted(str);
+	}
+	void operator()(const Array& arr) {
+		out << '[' << spaceIfIndent(indent);
+		if (arr.size() > 0) {
+			nestIndent += indent;
+			for (int i = 0; i < arr.size(); ++i) {
+				if (i != 0) {
+					out << ',' << spaceIfIndent(indent);
+				}
 
-					out << optionalNewLine(indent) << addIndent(nestIndent);
-					if (is<Array>(arr[i])) {
-						std::visit(*this, arr[i].variant());
-					}
-					else {
-						std::visit(*this, arr[i].variant());
-					}
+				out << optionalNewLine(indent) << addIndent(nestIndent);
+				if (is<Array>(arr[i])) {
+					std::visit(*this, arr[i].variant());
+				}
+				else {
+					std::visit(*this, arr[i].variant());
 				}
 			}
-			nestIndent -= indent;
-			out << optionalNewLine(nestIndent) << addIndent(nestIndent) << ']';
 		}
-		void operator()(const Object& obj) {
-			int count = 0;
-			out << '{';
-			if (obj.size() > 0) {
-				for (std::pair<std::string, json::Data> key : obj) {
-					if (count != 0) { out << ','; }
-					out << optionalNewLine(indent) << addIndent(indent) << std::quoted(key.first) << ':' << spaceIfIndent(indent);
-					std::visit(*this, key.second.variant());
-					count++;
-				}
+		nestIndent -= indent;
+		out << optionalNewLine(indent) << addIndent(nestIndent) << ']';
+	}
+	void operator()(const Object& obj) {
+		int count = 0;
+		out << '{';
+		if (obj.size() > 0) {
+			nestIndent += indent;
+			for (std::pair<std::string, json::Data> key : obj) {
+				if (count != 0) { out << ','; }
+				out << optionalNewLine(indent) << addIndent(nestIndent) << std::quoted(key.first) << ':' << spaceIfIndent(indent);
+				std::visit(*this, key.second.variant());
+				count++;
 			}
-			out << optionalNewLine(indent) << "}";
 		}
-	};
+		nestIndent -= indent;
+		out << optionalNewLine(indent) << addIndent(nestIndent) << "}";
+	}
+};
 	std::ostream& operator<<(std::ostream& out, const Data& data) {
 		Printer printer{ out, 0 };
 		std::visit(printer, data.variant());
