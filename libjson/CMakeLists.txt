@@ -2,6 +2,7 @@
 #---------------------------------------
 # Version with source files
 add_library(libjson STATIC
+  include/Data.hpp
   include/json.hpp
   include/parse.hpp
   parse.cpp
