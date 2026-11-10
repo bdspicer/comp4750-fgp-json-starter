@@ -40,6 +40,11 @@ namespace json {
 		return *this;
 	}
 
+	Data& Data::operator=(const char* charValue) {
+		data = charValue;
+		return *this;
+	}
+
 	// Array constructor implementation
 	Data::Data(Array arValue) : data{ arValue } {};
 

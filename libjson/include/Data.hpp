@@ -47,6 +47,7 @@ namespace json {
 
 		// String assignment operator
 		Data& operator=(const String& strValue);
+		Data& operator=(const char* charValue);
 
 		// Array constructor
 		Data(Array arValue);
