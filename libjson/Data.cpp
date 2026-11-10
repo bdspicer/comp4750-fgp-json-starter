@@ -143,12 +143,12 @@ struct Printer {
 
 	// Array print behavior
 	void operator()(const Array& arr) {
-		out << '[' << spaceIfIndent(indent);
+		out << '[';
 		if (arr.size() > 0) {
 			nestIndent += indent;
 			for (int i = 0; i < arr.size(); ++i) {
 				if (i != 0) {
-					out << ',' << spaceIfIndent(indent);
+					out << ',';
 				}
 
 				out << optionalNewLine(indent) << addIndent(nestIndent);
