@@ -1,5 +1,5 @@
 {
-    "nextId": 4,
+    "nextId": 6,
     "tasks": [ 
         {
             "completed": null,
@@ -24,6 +24,24 @@
             "completed": null,
             "done": false,
             "id": 3,
+            "tags": [ 
+                "work"
+            ],
+            "title": "Video editing"
+        }, 
+        {
+            "completed": null,
+            "done": false,
+            "id": 4,
+            "tags": [ 
+                "work"
+            ],
+            "title": "Video editing"
+        }, 
+        {
+            "completed": null,
+            "done": false,
+            "id": 5,
             "tags": [ 
                 "work"
             ],
