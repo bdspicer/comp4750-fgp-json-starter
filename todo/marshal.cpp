@@ -15,7 +15,10 @@ using Array = json::Array;
 using Data = json::Data;
 using MapElem = std::pair<std::string, json::Data>;
 
+// Declarations of marshal toDoObject function
 Object todoToObject(TodoList const& list);
+
+// Declarations of unmarshal functions
 int highestId(Data const& data);
 std::vector<Task> buildTasks(Data const& data);
 
@@ -40,7 +43,57 @@ TodoList unmarshal(json::Data const& data) {
 // as you are implementing the two above.
 //----------------------------------------------------------
 
-std::vector<std::string> getTags(Array tags) {
+// Runtime error helper function
+void throwRuntimeErr(std::string error) {
+	throw std::runtime_error(error);
+}
+
+// Converts a vector of std::string to a json::Array
+Array stringVectorToArray(std::vector<std::string> stringVec) {
+	Array strArray;
+	for (std::string str : stringVec) {
+		String strTag = str;
+		strArray.push_back(strTag);
+	}
+	return strArray;
+}
+
+// Builds a json::Object from a Task
+Object taskToObject(Task const& task) {
+	Object taskObj;
+	taskObj["id"] = task.id;
+	taskObj["title"] = task.title;
+	taskObj["done"] = task.done;
+	taskObj["tags"] = stringVectorToArray(task.tags);
+	if (task.completed != std::nullopt) {
+		String dateCompleted = *task.completed;
+		taskObj["completed"] = dateCompleted;
+	}
+	else {
+		taskObj["completed"] = json::null;
+	}
+	return taskObj;
+}
+
+// Calls taskToObject on a vector of tasks
+Array translateTaskList(const std::vector<Task>& tasks) {
+	Array translatedTasks;
+	for (const Task& task : tasks) {
+		translatedTasks.push_back(taskToObject(task));
+	}
+	return translatedTasks;
+}
+
+// Converts a TodoList to a json::Object represenation
+Object todoToObject(TodoList const& list) {
+	Object listObj;
+	listObj["nextId"] = list.nextId;
+	listObj["tasks"] = translateTaskList(list.tasks);
+	return listObj;
+}
+
+// Returns access to an Object's "tags" array
+std::vector<std::string> getTags(const Array& tags) {
 	std::vector<std::string> tagList = std::vector<std::string>(tags.size());
 	if (tags.size() != 0) {
 		for (int i = 0; i < tags.size(); ++i) {
@@ -50,13 +103,37 @@ std::vector<std::string> getTags(Array tags) {
 	return tagList;
 }
 
-void throwRuntimeErr(std::string error) {
-	throw std::runtime_error(error);
+// Returns a Data's task array
+Array getTasksFromData(Data const& data) {
+	Object toDoObject = as<Object>(data);
+	auto tasks = toDoObject.find(String{ "tasks" });
+	if (tasks == toDoObject.end()) {
+		throwRuntimeErr("Error: No \"tasks\" list found.");
+	}
+	else {
+		MapElem task = *tasks;
+		if (!is<Array>(task.second)) {
+			throwRuntimeErr("Error: \"tasks\" value must be stored as an Array.");
+		}
+		return as<Array>(task.second);
+	}
 }
 
+// Finds the highestId stored in Data's taskArray, increments and returns it
+int highestId(Data const& data) {
+	int highestId = 0;
+	Array taskArray = getTasksFromData(data);
+	auto arrayEnd = end(taskArray);
+	--arrayEnd;
+	Object lastArrayElem = as<Object>(*arrayEnd);
+	highestId = as<Number>(lastArrayElem["id"]);
+	return ++highestId;
+}
+
+// Builds a task using an Object, throws runtime error if key's value is missing
 Task buildTask(Object taskObj) {
 	Task task;
-	if (is<Number>(taskObj)["id"]){
+	if (is<Number>(taskObj)["id"]) {
 		task.id = as<Number>(taskObj["id"]);
 	}
 	else {
@@ -93,25 +170,7 @@ Task buildTask(Object taskObj) {
 	return task;
 }
 
-Array getTasksFromData(Data const& data) {
-	Object toDoObject = as<Object>(data);
-	Array taskArray{};
-	auto tasks = toDoObject.find(String{"tasks"});
-	if (tasks == toDoObject.end()) {
-		throwRuntimeErr("Error: No \"tasks\" list found.");
-	}
-	else {
-		MapElem task = *tasks;
-		if (is<Array>(task.second)) {
-			taskArray = as<Array>(task.second);
-		}
-		else {
-			throwRuntimeErr("Error: \"tasks\" value must be stored as an Array.");
-		}
-	}
-	return taskArray;
-}
-
+// Calls "buildTask" on each Data object in taskArray
 std::vector<Task> buildTasks(Data const& data) {
 	Array taskArray = getTasksFromData(data);
 	std::vector<Task> tasks = std::vector<Task>(taskArray.size());
@@ -122,54 +181,3 @@ std::vector<Task> buildTasks(Data const& data) {
 	}
 	return tasks;
 }
-
-int highestId(Data const& data) {
-	int highestId = 0;
-	Array taskArray = getTasksFromData(data);
-	auto arrayEnd = end(taskArray);
-	--arrayEnd;
-	Object lastArrayElem = as<Object>(*arrayEnd);
-	highestId = as<Number>(lastArrayElem["id"]);
-	return ++highestId;
-}
-
-Array getTags(std::vector<std::string> tags) {
-	Array arr;
-	for (std::string tag : tags) {
-		String strTag = tag;
-		arr.push_back(strTag);
-	}
-	return arr;
-}
-
-Object taskToObject(Task const& task) {
-	Object taskObj;
-	taskObj["id"] = task.id;
-	taskObj["title"] = task.title;
-	taskObj["done"] = task.done;
-	taskObj["tags"] = getTags(task.tags);
-	if (task.completed != std::nullopt) {
-		String dateCompleted = *task.completed;
-		taskObj["completed"] = dateCompleted;
-	}
-	else {
-		taskObj["completed"] = json::null;
-	}
-	return taskObj;
-}
-
-Array translateTaskList(const std::vector<Task>& tasks) {
-	Array translatedTasks;
-	for (const Task& task : tasks) {
-		translatedTasks.push_back(taskToObject(task));
-	}
-	return translatedTasks;
-}
-
-Object todoToObject(TodoList const& list) {
-	Object listObj;
-	listObj["nextId"] = list.nextId;
-	listObj["tasks"] = translateTaskList(list.tasks);
-	return listObj;
-}
-

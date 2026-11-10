@@ -3,37 +3,67 @@
 #include<iomanip>
 
 namespace json {
+
+	// Default Constructor implementation
 	Data::Data() : data{} {};
+
+	// Null constructor implementation
 	Data::Data(Null n) : data{} {};
+
+	// Global Null variable
+	Null null;
+
+	// Null assignment operator
+	Data& Data::operator=(const Null& null) {
+		data = null;
+		return *this;
+	}
+
+	// Number constructor implementation
 	Data::Data(Number numValue) : data{ numValue } {};
+
+	// Number assignment operator implementation
 	Data& Data::operator=(const Number& numValue) {
 		data = numValue;
 		return *this;
 	}
+
+	// String and char* constructor implementations
+	Data::Data(String strValue) : data{ strValue } {};
 	Data::Data(char const* characters) {
 		String str = characters;
 		data = str;
 	}
-	Data::Data(String strValue) : data{ strValue } {};
+	// String assignment operator implementation
 	Data& Data::operator=(const String& strValue) {
 		data = strValue;
 		return *this;
 	}
+
+	// Array constructor implementation
 	Data::Data(Array arValue) : data{ arValue } {};
+
+	// Array assignment operator implementation
 	Data& Data::operator=(const Array& arValue) {
 		data = arValue;
 		return *this;
 	}
+
+	// Object Constructor implementation
 	Data::Data(Object objValue) : data{ objValue } {};
+	// Object assignment operator implementation
 	Data& Data::operator=(const Object& objValue) {
 		data = objValue;
 		return *this;
 	}
+
 	std::partial_ordering Data::operator <=>(Data const&) const = default;
 
 	DataVariant& Data::variant()& {
 		return data;
 	}
+
+	// Variant getter implemenations
 	DataVariant const& Data::variant() const& {
 		return data;
 	}
@@ -41,10 +71,11 @@ namespace json {
 		return std::move(data);
 	}
 
-	Null null;
-
+	// Equality operator overload
 	bool Data::operator==(Data const&) const = default;
 
+
+	// Indentation helper functions
 	bool anyIndent(int indentAmount) { return indentAmount > 0; }
 
 	std::string optionalNewLine(const int& indent) {
@@ -74,14 +105,18 @@ namespace json {
 		return indentSpacing;
 	}
 
+// Printer manipulator struct
 struct Printer {
 	std::ostream& out;
 	int indent = 0;
 	int nestIndent = 0;
-	void operator()(const Null& n) {
 
+	// Null print behavior
+	void operator()(const Null& n) {
 		out << "null";
 	}
+
+	// Boolean print behavior
 	void operator()(const Boolean& b) {
 		if (b) {
 			out << "true";
@@ -90,12 +125,18 @@ struct Printer {
 			out << "false";
 		}
 	}
-	void operator()(const Number& n) {
-		out << n;
+
+	// Number print behavior
+	void operator()(const Number& num) {
+		out << num;
 	}
+
+	// String print behavior
 	void operator()(const String& str) {
 		out << std::quoted(str);
 	}
+
+	// Array print behavior
 	void operator()(const Array& arr) {
 		out << '[' << spaceIfIndent(indent);
 		if (arr.size() > 0) {
@@ -117,6 +158,8 @@ struct Printer {
 		nestIndent -= indent;
 		out << optionalNewLine(indent) << addIndent(nestIndent) << ']';
 	}
+
+	// Object print behavior
 	void operator()(const Object& obj) {
 		int count = 0;
 		out << '{';
@@ -133,6 +176,7 @@ struct Printer {
 		out << optionalNewLine(indent) << addIndent(nestIndent) << "}";
 	}
 };
+	// Ostream operator overloads for Data and Format types
 	std::ostream& operator<<(std::ostream& out, const Data& data) {
 		Printer printer{ out, 0 };
 		std::visit(printer, data.variant());
