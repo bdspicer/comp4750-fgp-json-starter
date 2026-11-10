@@ -19,6 +19,7 @@ using MapElem = std::pair<std::string, json::Data>;
 Object todoToObject(TodoList const& list);
 
 // Declarations of unmarshal functions
+//int highestId(Data const& data);
 int nextIdFromData(Data const& data);
 std::vector<Task> buildTasks(Data const& data);
 
@@ -134,35 +135,31 @@ Array getTasksFromData(Data const& data) {
 // Builds a task using an Object, throws runtime error if key's value is missing
 Task buildTask(Object taskObj) {
 	Task task;
-	std::string type{};
-	std::string field{};
 	if (is<Number>(taskObj)["id"]) {
-		type = "Int";
-		field = "id";
 		task.id = as<Number>(taskObj["id"]);
 	}
-	else if ((is<String>(taskObj)["title"])) {
-		type = "String";
-		field = "title";
+	else {
+		throwRuntimeErr("Error: Task ID must be an Int.");
+	}
+	if ((is<String>(taskObj)["title"])) {
 		String title = as<String>(taskObj["title"]);
 		task.title = title;
 	}
-	else if (is<Boolean>(taskObj)["done"]) {
-		type = "Boolean";
-		field = "done";
+	else {
+		throwRuntimeErr("Error: Title must be a String.");
+	}
+	if (is<Boolean>(taskObj)["done"]) {
 		task.done = as<Boolean>(taskObj["done"]);
 	}
-	else if (is<Array>(taskObj)["tags"]) {
-		type = "Array";
-		field = "tags";
+	else {
+		throwRuntimeErr("Error: \"Done\" value must be a Boolean.");
+	}
+	if (is<Array>(taskObj)["tags"]) {
 		task.tags = getTags(as<Array>(taskObj["tags"]));
 	}
 	else {
-		type = "Number";
-		field = "id";
-		throwRuntimeErr("Error: Task field: " + type + " must be of type " + field + ".");
+		throwRuntimeErr("Error: \"Tags\" must hold an Array.");
 	}
-	
 	if (is<Null>(taskObj["completed"])) {
 		task.completed = std::nullopt;
 	}
