@@ -6,9 +6,8 @@
 //   done <id>                Mark a task complete
 //   undo <id>                Mark a task incomplete
 //   rename <id> <title>      Change a task's title
-//   remove <id>              Delete a task
 
-#include "json.hpp"
+//   remove <id>              Delete a task
 #include "todo.hpp"
 #include "marshal.hpp"
 
